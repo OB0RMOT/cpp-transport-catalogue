@@ -1,14 +1,14 @@
 #pragma once
 #include "transport_catalogue.h"
 #include <iostream>
-
+ 
 namespace transport_catalogue {
 	namespace stat_reader {
 
-		// функция вывода информации о остановке.
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 		void PutStopInfo(const std::string& stop_name, TransportCatalogue& transport_catalogue);
 
-		// функция вывода информации о маршруте.
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 		void PutBusInfo(const std::string& bus_name, TransportCatalogue& transport_catalogue);
 	}
 }

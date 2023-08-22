@@ -2,7 +2,7 @@
 #include "transport_catalogue.h"
 #include "stat_reader.h"
 #include <sstream>
-
+ 
 namespace transport_catalogue {
 	namespace input_reader {
 

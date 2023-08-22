@@ -4,7 +4,7 @@
 #include "input_reader.h"
 
 
-using namespace std;
+using namespace std; 
 
 int main() {
     transport_catalogue::TransportCatalogue transport_catalogue;

@@ -1,7 +1,7 @@
 #include "stat_reader.h"
 
 using namespace std;
-
+ 
 namespace transport_catalogue::stat_reader {
 
 	void PutBusInfo(const string& bus_name, TransportCatalogue& transport_catalogue) {

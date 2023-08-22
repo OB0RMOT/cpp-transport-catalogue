@@ -10,7 +10,7 @@
 #include <tuple>
 #include <functional>
 #include <unordered_set>
-
+ 
 namespace transport_catalogue {
 
 	#define NPOS string::npos
