@@ -3,10 +3,11 @@
 
 #include "input_reader.h"
 
+using namespace std;
 
-using namespace std; 
-
-int main() {
+int main()
+{
     transport_catalogue::TransportCatalogue transport_catalogue;
-    transport_catalogue::input_reader::LoadQueries(std::cin, transport_catalogue);
+    vector<pair<char, string>> output_queries = transport_catalogue::input_reader::LoadQueries(cin, transport_catalogue);
+    cout << transport_catalogue::stat_reader::GetInfoOnQueries(output_queries, transport_catalogue).str();
 }
