@@ -4,18 +4,37 @@ using namespace std;
 
 namespace transport_catalogue::stat_reader {
 
-	ostringstream GetInfoOnQueries(vector<pair<char, string>>& output_queries, TransportCatalogue& transport_catalogue)
+	ostringstream LoadOutputQueries(std::stringstream& stream, TransportCatalogue& transport_catalogue)
 	{
+		string tmp = ""s;							// строка для текущего запроса.
+
 		ostringstream result;
-		for (auto [type, str] : output_queries)
+
+		while (getline(stream, tmp))				// пока поток не пустой.
 		{
-			if (type == 'S')
+			if (tmp == ""s)
 			{
-				stat_reader::PutStopInfo(str, transport_catalogue, result);
+				break; ////
 			}
-			else
+			if (!isdigit(tmp[0]))					// ожидание строки с кол-вом запросов N.
 			{
-				stat_reader::PutBusInfo(str, transport_catalogue, result);
+				continue;
+			}
+			vector<string> queries = move(detail::StreamSectionToVector(stoi(tmp), stream)); // создаем вектор запросов и инициализируем одной секцией (секция - это N запросов после получения кол-ва запросов N).
+			for (string query : queries)
+			{
+				auto colon = query.find(':');
+				if (colon == NPOS)
+				{
+					if (query[0] == 'S')
+					{
+						stat_reader::PutStopInfo(query.erase(0, query.find(' ') + 1), transport_catalogue, result);
+					}
+					else if (query[0] == 'B')
+					{
+						stat_reader::PutBusInfo(query.erase(0, query.find(' ') + 1), transport_catalogue, result);
+					}
+				}
 			}
 		}
 		return result;

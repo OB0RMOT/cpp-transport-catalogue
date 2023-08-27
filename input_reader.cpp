@@ -6,23 +6,19 @@ using namespace std;
 namespace transport_catalogue::input_reader {
 
 	// функция чтения и разбора запросов из потока.
-	vector<pair<char, string>> LoadQueries(std::istream& stream, TransportCatalogue& transport_catalogue) {
+	void LoadInputQueries(std::stringstream& stream, TransportCatalogue& transport_catalogue) {
 
 		string tmp = ""s;					// строка для текущего запроса.
-		vector<pair<char, string>> output_queries; // вектор запросов на вывод (тип запроса и сам запрос).
 
-		while (getline(stream, tmp))				// пока поток не пустой.
+		while (true)				// пока поток не пустой.
 		{
-			if (tmp == ""s)
-			{
-				break; ////
-			}
+			getline(stream, tmp);
 			// получение строки запроса.
 			if (!isdigit(tmp[0]))			// ожидание строки с кол-вом запросов N.
 			{
 				continue;
 			}
-			vector<string> queries = move(StreamSectionToVector(stoi(tmp), stream)); // создаем вектор запросов и инициализируем одной секцией (секция - это N запросов после получения кол-ва запросов N).
+			vector<string> queries = move(detail::StreamSectionToVector(stoi(tmp), stream)); // создаем вектор запросов и инициализируем одной секцией (секция - это N запросов после получения кол-ва запросов N).
 
 			for (string query : queries)										
 			{
@@ -54,23 +50,8 @@ namespace transport_catalogue::input_reader {
 					}
 				}
 			}
-			for (string query : queries)
-			{
-				auto colon = query.find(':');
-				if (colon == NPOS)
-				{
-					if (query[0] == 'S')
-					{
-						output_queries.push_back({ 'S', query.erase(0, query.find(' ') + 1) });
-					}
-					else if (query[0] == 'B')
-					{
-						output_queries.push_back({ 'B', query.erase(0, query.find(' ') + 1) });
-					}
-				}
-			}
+			break;
 		}
-		return output_queries;
 	}
 
 	// функция преобразования строки в остановку.
@@ -169,19 +150,5 @@ namespace transport_catalogue::input_reader {
 				break;
 			}
 		}
-	}
-
-	// функция чтения и разбиения запросов одной секции на вектор строк.
-	vector<string> StreamSectionToVector(const int& queries_count, std::istream& stream)
-	{
-		vector<string> queries(queries_count);	// вектор для секции запросов.
-		string query;
-		for (int i = 0; i < queries_count; ++i) // перебираем запросы секции.
-		{
-			getline(stream, query);				// получение текущего запроса.
-			queries.push_back(query);			// добавление в вектор запросов.
-		}
-
-		return queries;
 	}
 }

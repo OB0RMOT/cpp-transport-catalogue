@@ -10,8 +10,14 @@
 #include <tuple>
 #include <functional>
 #include <unordered_set>
+#include <sstream>
+#include <iostream>
 
 namespace transport_catalogue {
+	namespace detail {
+		// функция чтения и разбиения запросов одной секции на вектор строк.
+		std::vector<std::string> StreamSectionToVector(const int& queries_count, std::stringstream& stream);
+	}
 
 	#define NPOS string::npos
 

@@ -2,6 +2,21 @@
 using namespace std;
 
 namespace transport_catalogue {
+	namespace detail {
+		// функция чтения и разбиения запросов одной секции на вектор строк.
+		std::vector<std::string> StreamSectionToVector(const int& queries_count, std::stringstream& stream)
+		{
+			vector<string> queries(queries_count);	// вектор для секции запросов.
+			string query;
+			for (int i = 0; i < queries_count; ++i) // перебираем запросы секции.
+			{
+				getline(stream, query);				// получение текущего запроса.
+				queries.push_back(query);			// добавление в вектор запросов.
+			}
+
+			return queries;
+		}
+	}
 
 	void TransportCatalogue::AddBus(const string& bus_name, bool is_circle, list<string>& stops_names) {
 		Bus bus;
