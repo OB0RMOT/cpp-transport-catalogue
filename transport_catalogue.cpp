@@ -18,7 +18,7 @@ namespace transport_catalogue {
 		}
 	}
 
-	void TransportCatalogue::AddBus(const string& bus_name, bool is_circle, list<string>& stops_names) {
+	void TransportCatalogue::AddBus(const string& bus_name, bool is_circle, vector<string>& stops_names) {
 		Bus bus;
 		bus.name = bus_name;
 		bus.is_circle = is_circle;
@@ -41,8 +41,8 @@ namespace transport_catalogue {
 		distances_.insert({ {stops_map_.at(first_stop_name), stops_map_.at(second_stop_name)}, distance });
 	}
 
-	void TransportCatalogue::AddStop(const Stop& stop) {
-		stops_.push_back(stop);
+	void TransportCatalogue::AddStop(const string& name, const geo::Coordinates coordinates) {
+		stops_.push_back({ name, coordinates });
 		stops_map_[string_view(stops_.back().name)] = &stops_.back();
 		stops_to_buses_[&stops_.back()];
 	}
@@ -59,7 +59,7 @@ namespace transport_catalogue {
 		return stops_map_.at(name);
 	}
 
-	BusInfo TransportCatalogue::GetBusInfo(string_view name) {
+	BusInfo TransportCatalogue::GetBusInfo(string_view name) const {
 		if (buses_.count(string(name)) == 0)
 		{
 			static BusInfo empty;
@@ -120,7 +120,7 @@ namespace transport_catalogue {
 		return { stops_on_route, static_cast<int>(unique_stops_names.size()), distance, distance / coordinates_distance };
 	}
 
-	tuple<set<string>, bool> TransportCatalogue::GetStopInfo(const string& name)
+	tuple<set<string>, bool> TransportCatalogue::GetStopInfo(const string& name) const
 	{
 		if (stops_map_.count(name) == 0)
 		{
@@ -133,5 +133,11 @@ namespace transport_catalogue {
 			result.insert(bus->name);
 		}
 		return { result, true };
+	}
+
+	const std::map<std::string, Bus> TransportCatalogue::GetBuses() const
+	{
+		const std::map<std::string, Bus> result(buses_.begin(), buses_.end());
+		return result;
 	}
 }

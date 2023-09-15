@@ -1,26 +1,31 @@
-﻿#include <iostream>
-#include <sstream>
-
-#include "input_reader.h"
+#include "request_handler.h"
+#include "json_reader.h"
 
 using namespace std;
+using namespace transport_catalogue;
+using namespace json;
+using namespace renderer;
 
-int main()
-{
-    transport_catalogue::TransportCatalogue transport_catalogue;
+int main() {
+    TransportCatalogue tcat;
+    JsonReader jread(Load(cin));
+    MapRenderer renderer(jread.LoadRenderSettings());
+    jread.FillTransportCatalogue(tcat);
+    RequestHandler rhand(tcat, renderer);
+    rhand.ProcessStatRequests(jread.GetStatRequests(), cout);
+}/*
+#include "request_handler.h"
+#include "json_reader.h"
+#include "map_renderer.h"
 
-    std::stringstream input_stream; // Создаем stringstream
+using namespace std;
+using namespace transport_catalogue;
+using namespace json;
 
-    std::string line;
-    while (std::getline(std::cin, line))
-    {
-        if (line == ""s)
-        {
-            break; ////
-        }
-        input_stream << line << '\n'; // Записываем ввод в stringstream
-    }
-
-    transport_catalogue::input_reader::LoadInputQueries(input_stream, transport_catalogue);
-    cout << transport_catalogue::stat_reader::LoadOutputQueries(input_stream, transport_catalogue).str();
+int main() {
+    TransportCatalogue tcat;
+    JsonReader jread(Load(cin));
+    jread.FillTransportCatalogue(tcat);
+    jread.LoadRenderSettings().GetSvgDocument(tcat.GetBuses()).Render(cout);
 }
+*/
