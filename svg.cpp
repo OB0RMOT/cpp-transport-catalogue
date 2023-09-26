@@ -11,8 +11,8 @@ void Document::AddPtr(std::unique_ptr<Object>&& obj) {
 }
 
 void Document::Render(std::ostream& out) const {
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"sv;
-    out << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">"sv;
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"sv;
+    out << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n"sv;
     RenderContext ctx(out, 2, 2);
     for (auto& obj : objects_)
     {
@@ -84,7 +84,7 @@ void Text::RenderObject(const RenderContext& context) const {
         else                { out << c; }
     }
     
-    out << "</text>"sv;
+    out << "</text>\n"sv;
 }
 
 Polyline& Polyline::AddPoint(Point point) {
@@ -109,7 +109,7 @@ void Polyline::RenderObject(const RenderContext& context) const {
     
     out << "\"";
     RenderAttrs(out); 
-    out << "/> "sv;
+    out << "/>\n"sv;
 }
 
 void Object::Render(const RenderContext& context) const {
@@ -139,7 +139,7 @@ void Circle::RenderObject(const RenderContext& context) const {
     out << "<circle cx=\""sv << center_.x << "\" cy=\""sv << center_.y << "\" "sv;
     out << "r=\""sv << radius_ << "\""sv;
     RenderAttrs(out);
-    out << "/>"sv;
+    out << "/>\n"sv;
 }
 
 std::ostream& operator<<(std::ostream& out, const svg::StrokeLineCap& line_cap) {

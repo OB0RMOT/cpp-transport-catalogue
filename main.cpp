@@ -12,7 +12,7 @@ int main() {
     MapRenderer renderer(jread.LoadRenderSettings());
     jread.FillTransportCatalogue(tcat);
     RequestHandler rhand(tcat, renderer);
-    rhand.ProcessStatRequests(jread.GetStatRequests(), cout);
+    jread.ProcessStatRequests(rhand, cout);
 }/*
 #include "request_handler.h"
 #include "json_reader.h"

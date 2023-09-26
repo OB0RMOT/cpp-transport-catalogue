@@ -30,7 +30,7 @@ namespace renderer {
 
         std::vector<svg::Circle> GetStopCircles(const std::map<std::string, domain::Stop>& stops, const SphereProjector& sp) const;
 
-        svg::Document GetSvgDocument(const std::map<std::string, domain::Bus>& buses) const;
+        svg::Document RenderSvgDocument(const std::map<std::string, domain::Bus>& buses) const;
 
     private:
         double width_ = 0;

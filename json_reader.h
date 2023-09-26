@@ -1,7 +1,6 @@
 #pragma once
-#include "json.h"
-#include "transport_catalogue.h"
-#include "map_renderer.h"
+
+#include "request_handler.h"
 
 
 class JsonReader {
@@ -10,7 +9,7 @@ public:
 
 	void FillTransportCatalogue(transport_catalogue::TransportCatalogue& tcat);
 
-	json::Node GetStatRequests() const;
+	void ProcessStatRequests(RequestHandler& request_handler, std::ostream& output);
 
 	renderer::MapRenderer LoadRenderSettings();
 

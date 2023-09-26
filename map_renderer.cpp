@@ -5,6 +5,59 @@ using namespace domain;
 using namespace svg;
 using namespace geo;
 namespace renderer {
+
+    vector<svg::Color> GetColorPalette(json::Node n)
+    {
+        const Array& color_palette = n.AsArray();
+        std::vector<svg::Color> cp;
+        for (const Node& node : color_palette)
+        {
+            if (node.IsArray())
+            {
+                const Array& arr = node.AsArray();
+                if (arr.size() == 3)
+                {
+                    Rgb rgb_colors(arr[0].AsInt(), arr[1].AsInt(), arr[2].AsInt());
+                    cp.push_back(rgb_colors);
+                }
+                else if (arr.size() == 4)
+                {
+                    Rgba rgba_colors(arr[0].AsInt(), arr[1].AsInt(), arr[2].AsInt(), arr[3].AsDouble());
+                    cp.push_back(rgba_colors);
+                }
+            }
+            else if (node.IsString())
+            {
+                cp.push_back(node.AsString());
+            }
+        }
+        return cp;
+    }
+
+    svg::Color GetUnderlayerColor(json::Node node)
+    {
+        svg::Color underlayer_color;
+        if (node.IsArray())
+        {
+            const Array& arr = node.AsArray();
+            if (arr.size() == 3)
+            {
+                Rgb rgb_colors(arr[0].AsInt(), arr[1].AsInt(), arr[2].AsInt());
+                underlayer_color = rgb_colors;
+            }
+            else if (arr.size() == 4)
+            {
+                Rgba rgba_colors(arr[0].AsInt(), arr[1].AsInt(), arr[2].AsInt(), arr[3].AsDouble());
+                underlayer_color = rgba_colors;
+            }
+        }
+        else if (node.IsString())
+        {
+            underlayer_color = node.AsString();
+        }
+        return underlayer_color;
+    }
+
     MapRenderer::MapRenderer(const Node& render_settings)
     {
         if (render_settings.IsNull()) return;
@@ -22,47 +75,9 @@ namespace renderer {
         const Array& stop_label_offset = settings_map.at("stop_label_offset"s).AsArray();
         stop_label_offset_ = { stop_label_offset[0].AsDouble(),
                                stop_label_offset[1].AsDouble() };
-        if (settings_map.at("underlayer_color"s).IsArray())
-        {
-            const Array& arr = settings_map.at("underlayer_color"s).AsArray();
-            if (arr.size() == 3)
-            {
-                Rgb rgb_colors(arr[0].AsInt(), arr[1].AsInt(), arr[2].AsInt());
-                underlayer_color_ = rgb_colors;
-            }
-            else if (arr.size() == 4)
-            {
-                Rgba rgba_colors(arr[0].AsInt(), arr[1].AsInt(), arr[2].AsInt(), arr[3].AsDouble());
-                underlayer_color_ = rgba_colors;
-            }
-        }
-        else if (settings_map.at("underlayer_color"s).IsString())
-        {
-            underlayer_color_ = settings_map.at("underlayer_color"s).AsString();
-        }
+        underlayer_color_ = GetUnderlayerColor(settings_map.at("underlayer_color"s));
         underlayer_width_ = settings_map.at("underlayer_width"s).AsDouble();
-        const Array& color_palette = settings_map.at("color_palette"s).AsArray();
-        for (const Node& node : color_palette)
-        {
-            if (node.IsArray())
-            {
-                const Array& arr = node.AsArray();
-                if (arr.size() == 3)
-                {
-                    Rgb rgb_colors(arr[0].AsInt(), arr[1].AsInt(), arr[2].AsInt());
-                    color_palette_.push_back(rgb_colors);
-                }
-                else if (arr.size() == 4)
-                {
-                    Rgba rgba_colors(arr[0].AsInt(), arr[1].AsInt(), arr[2].AsInt(), arr[3].AsDouble());
-                    color_palette_.push_back(rgba_colors);
-                }
-            }
-            else if (node.IsString())
-            {
-                color_palette_.push_back(node.AsString());
-            }
-        }
+        color_palette_ = GetColorPalette(settings_map.at("color_palette"s));
     }
 
     vector<Polyline> MapRenderer::GetBusLines(const map<string, Bus>& buses, const SphereProjector& sp) const
@@ -189,7 +204,7 @@ namespace renderer {
         return result;
     }
 
-    svg::Document MapRenderer::GetSvgDocument(const map<string, Bus>& buses) const
+    svg::Document MapRenderer::RenderSvgDocument(const map<string, Bus>& buses) const
     {
         map<string, Stop> all_stops;
         vector<Coordinates> all_coords;
