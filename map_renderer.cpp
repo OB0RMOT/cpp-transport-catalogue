@@ -61,7 +61,7 @@ namespace renderer {
     MapRenderer::MapRenderer(const Node& render_settings)
     {
         if (render_settings.IsNull()) return;
-        const Dict& settings_map = render_settings.AsMap();
+        const Dict& settings_map = render_settings.AsDict();
         width_ = settings_map.at("width"s).AsDouble();
         height_ = settings_map.at("height"s).AsDouble();
         padding_ = settings_map.at("padding"s).AsDouble();

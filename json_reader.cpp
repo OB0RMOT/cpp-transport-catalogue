@@ -13,17 +13,17 @@ void JsonReader::FillTransportCatalogue(transport_catalogue::TransportCatalogue&
 
 renderer::MapRenderer JsonReader::LoadRenderSettings()
 {
-	return renderer::MapRenderer(requests_.AsMap().at("render_settings"s).AsMap());
+	return renderer::MapRenderer(requests_.AsDict().at("render_settings"s).AsDict());
 }
 
 void JsonReader::LoadStopDistancesRequests(transport_catalogue::TransportCatalogue& tcat)
 {
-	for (Node request : requests_.AsMap().at("base_requests"s).AsArray())
+	for (Node request : requests_.AsDict().at("base_requests"s).AsArray())
 	{
-		Dict map = request.AsMap();
+		Dict map = request.AsDict();
 		if (map.at("type"s).AsString() == "Stop"s)
 		{
-			for (auto m : map.at("road_distances"s).AsMap())
+			for (auto m : map.at("road_distances"s).AsDict())
 			{
 				tcat.AddStopDistances(map.at("name"s).AsString(), m.first, m.second.AsInt());
 			}
@@ -33,9 +33,9 @@ void JsonReader::LoadStopDistancesRequests(transport_catalogue::TransportCatalog
 
 void JsonReader::LoadStopRequests(transport_catalogue::TransportCatalogue& tcat)
 {
-	for (Node request : requests_.AsMap().at("base_requests"s).AsArray())
+	for (Node request : requests_.AsDict().at("base_requests"s).AsArray())
 	{
-		Dict map = request.AsMap();
+		Dict map = request.AsDict();
 		if (map.at("type"s).AsString() == "Stop"s)
 		{
 			string name = map.at("name"s).AsString();
@@ -46,9 +46,9 @@ void JsonReader::LoadStopRequests(transport_catalogue::TransportCatalogue& tcat)
 
 void JsonReader::LoadBusRequests(transport_catalogue::TransportCatalogue& tcat)
 {
-	for (Node request : requests_.AsMap().at("base_requests"s).AsArray())
+	for (Node request : requests_.AsDict().at("base_requests"s).AsArray())
 	{
-		Dict map = request.AsMap();
+		Dict map = request.AsDict();
 		if (map.at("type"s).AsString() == "Bus"s)
 		{
 			vector<string> stops;
@@ -63,30 +63,29 @@ void JsonReader::LoadBusRequests(transport_catalogue::TransportCatalogue& tcat)
 
 void JsonReader::ProcessStatRequests(RequestHandler& request_handler, std::ostream& out)
 {
-    Node n = requests_.AsMap().at("stat_requests"s);
-	Array arr;
+    Node n = requests_.AsDict().at("stat_requests"s);
+	Builder document{};
+	document.StartArray();
 	for (Node request : n.AsArray())
 	{
-		Dict map = request.AsMap();
+		Dict map = request.AsDict();
 		if (map.at("type"s).AsString() == "Map"s)
 		{
-			Dict dict;
 			ostringstream osstr;
 			request_handler.RenderMap().Render(osstr);
-			dict.insert({ "map"s, osstr.str() });
-			dict.insert({ "request_id"s, map.at("id"s) });
-			arr.push_back(dict);
+			document.StartDict()
+						.Key("map"s).Value(osstr.str())
+						.Key("request_id"s).Value(map.at("id"s).AsInt())
+					.EndDict();
 		}
 		if (map.at("type"s).AsString() == "Stop"s)
 		{
-			Dict dict;
-			dict.insert({ "request_id"s, map.at("id"s) });
+			document.StartDict().Key("request_id"s).Value(map.at("id"s).AsInt());
 			string name = map.at("name"s).AsString();
 			auto [buses, stop_find] = request_handler.GetStopStat(name);
 				if (!stop_find)
 				{
-					dict.insert({ "error_message"s, "not found"s });////
-					arr.push_back(dict);
+					document.Key("error_message"s).Value("not found"s).EndDict();
 					continue;
 				}
 			Array a;
@@ -94,29 +93,26 @@ void JsonReader::ProcessStatRequests(RequestHandler& request_handler, std::ostre
 			{
 				a.push_back(s);
 			}
-			dict.insert({ "buses"s, a });
-			arr.push_back(dict);
+			document.Key("buses"s).Value(a).EndDict();
 		}
 		if (map.at("type"s).AsString() == "Bus"s)
 		{
-			Dict dict;
-			dict.insert({ "request_id"s, map.at("id"s) });
+			document.StartDict().Key("request_id"s).Value(map.at("id"s).AsInt());
 			string name = map.at("name"s).AsString();
 			domain::BusInfo bus_info = request_handler.GetBusStat(name);
 				if (bus_info.stops_on_route == 0)
 				{
-					dict.insert({ "error_message"s, "not found"s });
-					arr.push_back(dict);
+					document.Key("error_message"s).Value("not found"s).EndDict();
 					continue;
 				}
-			dict.insert({ "stop_count"s, bus_info.stops_on_route });
-			dict.insert({ "unique_stop_count"s, bus_info.unique_stops });
-			dict.insert({ "route_length"s, bus_info.route_lenght });
-			dict.insert({ "curvature"s, bus_info.curvature });
-			arr.push_back(dict);
+			document.Key("stop_count"s).Value(bus_info.stops_on_route)
+					.Key("unique_stop_count"s).Value(bus_info.unique_stops)
+					.Key("route_length"s).Value(bus_info.route_lenght)
+					.Key("curvature"s).Value(bus_info.curvature).EndDict();
 		}
 	}
-	json::Print(Document(arr), out);
+	document.EndArray();
+	json::Print(Document(document.Build()), out);
 }
 
 /*
