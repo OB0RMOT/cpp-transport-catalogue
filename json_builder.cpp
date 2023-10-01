@@ -10,91 +10,58 @@ Builder::Builder()
 }
 Builder::DictKeyContext Builder::Key(const std::string& key)
 {
-    auto top_node = nodes_stack_.back();
-    if(!top_node->IsDict()) { throw std::logic_error("Key is called out of the dictionary"s); }
-    else if(key_) { throw std::logic_error("Previous Key was called but not used"s); }
+    //auto top_node = nodes_stack_.back();
+    //if(!top_node->IsDict()) { throw std::logic_error("Key is called out of the dictionary"s); }
     key_ = key;
     return *this;
 }
-Builder& Builder::Value(const Node::Value& value)
+[[maybe_unused]] Node* Builder::AddObject(const Node& node)
 {
     auto top_node = nodes_stack_.back();
+    Node* node_ptr = nullptr;
     if (top_node->IsNull())
     {
-        top_node->GetValue() = value;
+        *top_node = node;
     }
     else if (top_node->IsArray())
     {
         auto& arr = std::get<Array>(top_node->GetValue());
-        arr.push_back(Node{});
-        arr.back().GetValue() = value;
+        arr.push_back(node);
+        node_ptr = &arr.back();
     }
     else if (top_node->IsDict())
     {
-        if (!key_) { throw std::logic_error("No key to add a value to the dictionary"s); }
         auto& dict = std::get<Dict>(top_node->GetValue());
-        auto [pos, _] = dict.emplace(key_.value(), Node{});
-        pos->second.GetValue() = value;
-        key_ = std::nullopt;
+        auto [pos, _] = dict.emplace(key_, node);
+        node_ptr = &(pos->second);
     }
     else
     {
         throw std::logic_error("Unknown error"s);
     }
+    return node_ptr;
+}
+Builder& Builder::Value(const Node::Value& value)
+{
+    Node node;
+    node.GetValue() = value;
+    AddObject(node);
     return *this;
 }
 Builder::DictItemContext Builder::StartDict()
 {
-    auto top_node = nodes_stack_.back();
-    if (top_node->IsNull())
-    {
-        top_node->GetValue() = Dict();
-    }
-    else if (top_node->IsArray())
-    {
-        auto& arr = std::get<Array>(top_node->GetValue());
-        arr.push_back(Dict());
-        nodes_stack_.push_back(&arr.back());
-    }
-    else if (top_node->IsDict())
-    {
-        if (!key_) { throw std::logic_error("No key to add a new dictionary to the dictionary"s); }
-        auto& dict = std::get<Dict>(root_.GetValue());
-        auto [pos, _] = dict.emplace(key_.value(), Node(Dict()));
-        nodes_stack_.push_back(&(pos->second));
-        key_ = std::nullopt;
-    }
-    else
-    {
-        throw std::logic_error("Unknown error"s);
-    }
+    Node node;
+    node.GetValue() = Dict();
+    Node* node_ptr = AddObject(node);
+    if(node_ptr) { nodes_stack_.push_back(node_ptr); }
     return *this;
 }
 Builder::ArrayItemContext Builder::StartArray()
 {
-    auto top_node = nodes_stack_.back();
-    if (top_node->IsNull())
-    {
-        top_node->GetValue() = Array();
-    }
-    else if (top_node->IsArray())
-    {
-        auto& arr = std::get<Array>(top_node->GetValue());
-        arr.push_back(Array());
-        nodes_stack_.push_back(&arr.back());
-    }
-    else if (top_node->IsDict())
-    {
-        if (!key_) { throw std::logic_error("No key to add a new dictionary to the dictionary"s); }
-        auto& dict = std::get<Dict>(root_.GetValue());
-        auto [pos, _] = dict.emplace(key_.value(), Node(Array()));
-        nodes_stack_.push_back(&(pos->second));
-        key_ = std::nullopt;
-    }
-    else
-    {
-        throw std::logic_error("Unknown error"s);
-    }
+    Node node;
+    node.GetValue() = Array();
+    Node* node_ptr = AddObject(node);
+    if(node_ptr) { nodes_stack_.push_back(node_ptr); }
     return *this;
 }
 Builder& Builder::EndDict()
@@ -116,7 +83,6 @@ json::Node Builder::Build()
     if (nodes_stack_.size() > 1 && (nodes_stack_.back()->IsDict() || nodes_stack_.back()->IsArray()))
     { throw std::logic_error("End was not called for every Start"s); }
     else if (root_.IsNull()) { throw std::logic_error("Object is not defined"s); }
-    else if (key_) { throw std::logic_error("Key was called but not used"s); }
     return root_;
 }
     

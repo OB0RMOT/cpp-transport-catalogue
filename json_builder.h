@@ -14,6 +14,7 @@ public:
     
     Builder();
     DictKeyContext Key(const std::string& key);
+    [[maybe_unused]] Node* AddObject(const Node& node);
     Builder& Value(const Node::Value& value);
     DictItemContext StartDict();
     ArrayItemContext StartArray();
@@ -24,7 +25,7 @@ public:
 private:
     Node root_{ nullptr };
     std::vector<Node*> nodes_stack_;
-    std::optional<std::string> key_;
+    std::string key_;
 };
     
 class Builder::DictKeyContext {
