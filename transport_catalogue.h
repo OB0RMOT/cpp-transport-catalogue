@@ -47,13 +47,16 @@ namespace transport_catalogue {
 
 		const std::map<std::string, Bus> GetBuses() const;
 
+		const std::map<std::string_view, Stop*> GetStops() const;
+
+		int GetDistance(const Stop* from, const Stop* to) const;
+
 	private:
 		struct StopPointerPairHasher {
-			std::size_t operator()(const std::pair<Stop*, Stop*>& key) const {
-				std::size_t h1 = std::hash<std::string>()(key.first->name);
-				std::size_t h2 = std::hash<std::string>()(key.second->name);
-				// Производим побитовую операцию XOR между хешами указателей
-				return h1 ^ h2;
+			size_t operator()(const std::pair<const Stop*, const Stop*>& points) const {
+				size_t hash_first = std::hash<const void*>{}(points.first);
+				size_t hash_second = std::hash<const void*>{}(points.second);
+				return hash_first + hash_second * 37;
 			}
 		};
 
@@ -68,6 +71,6 @@ namespace transport_catalogue {
 		std::unordered_map<std::string_view, Stop*> stops_map_; //
 		std::unordered_map<Stop*, std::vector<Bus*>, StopPointerHasher> stops_to_buses_;
 		std::unordered_map<std::string, Bus> buses_; // все маршруты.
-		std::unordered_map<std::pair<Stop*, Stop*>, int, StopPointerPairHasher> distances_;
+		std::unordered_map<std::pair<const Stop*, const Stop*>, int, StopPointerPairHasher> distances_;
 	};
 }

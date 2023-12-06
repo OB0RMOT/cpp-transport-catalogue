@@ -140,4 +140,15 @@ namespace transport_catalogue {
 		const std::map<std::string, Bus> result(buses_.begin(), buses_.end());
 		return result;
 	}
+
+	const std::map<std::string_view, Stop*> TransportCatalogue::GetStops() const {
+		const std::map<std::string_view, Stop*> result(stops_map_.begin(), stops_map_.end());
+		return result;
+	}
+
+	int TransportCatalogue::GetDistance(const Stop* from, const Stop* to) const {
+		if (distances_.count({ from, to })) return distances_.at({ from, to });
+		else if (distances_.count({ to, from })) return distances_.at({ to, from });
+		else return 0;
+	}
 }

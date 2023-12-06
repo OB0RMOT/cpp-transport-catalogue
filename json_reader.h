@@ -1,6 +1,7 @@
 #pragma once
 
 #include "request_handler.h"
+#include "transport_router.h"
 #include "json_builder.h"
 
 
@@ -14,6 +15,8 @@ public:
 
 	renderer::MapRenderer LoadRenderSettings();
 
+	transport_catalogue::Router GetRoutingSettings();
+
 private:
 	json::Node requests_;
 
@@ -22,6 +25,8 @@ private:
 	void LoadStopRequests(transport_catalogue::TransportCatalogue& tcat);
 
 	void LoadBusRequests(transport_catalogue::TransportCatalogue& tcat);
+
+	
 };
 
 /*
