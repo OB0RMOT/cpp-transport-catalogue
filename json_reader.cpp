@@ -62,10 +62,10 @@ void JsonReader::LoadBusRequests(transport_catalogue::TransportCatalogue& tcat)
 	}
 }
 
-transport_catalogue::Router JsonReader::GetRoutingSettings()
+pair<int, double> JsonReader::GetRoutingSettings()
 {
 	Node request = requests_.AsDict().at("routing_settings"s);
-	return transport_catalogue::Router { request.AsDict().at("bus_wait_time"s).AsInt(), request.AsDict().at("bus_velocity"s).AsDouble() };
+	return { request.AsDict().at("bus_wait_time"s).AsInt(), request.AsDict().at("bus_velocity"s).AsDouble() };
 }
 
 void JsonReader::ProcessStatRequests(RequestHandler& request_handler, std::ostream& out)

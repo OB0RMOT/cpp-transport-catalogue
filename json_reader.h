@@ -15,7 +15,7 @@ public:
 
 	renderer::MapRenderer LoadRenderSettings();
 
-	transport_catalogue::Router GetRoutingSettings();
+	std::pair<int, double> GetRoutingSettings();
 
 private:
 	json::Node requests_;
