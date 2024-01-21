@@ -104,11 +104,11 @@ public:
         return GetValue() == rhs.GetValue();
     }
 
-    Value& GetValue() {
+    const Value& GetValue() const {
         return *this;
     }
-        
-    const Value& GetValue() const {
+
+    Value& GetValue() {
         return *this;
     }
 };
@@ -143,4 +143,4 @@ Document Load(std::istream& input);
 
 void Print(const Document& doc, std::ostream& output);
 
-}  // namespace json
+} // namespace json

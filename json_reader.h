@@ -1,30 +1,40 @@
 #pragma once
 
+#include "json.h"
+#include "transport_catalogue.h"
+#include "map_renderer.h"
 #include "request_handler.h"
-#include "json_builder.h"
 
+#include <iostream>
 
 class JsonReader {
 public:
-	JsonReader(json::Document document) : requests_(document.GetRoot()){}
+    JsonReader(std::istream& input)
+        : input_(json::Load(input))
+    {}
 
-	void FillTransportCatalogue(transport_catalogue::TransportCatalogue& tcat);
+    const json::Node& GetBaseRequests() const;
+    const json::Node& GetStatRequests() const;
+    const json::Node& GetRenderSettings() const;
+    const json::Node& GetRoutingSettings() const;
+    const json::Node& GetSerializationSettings() const;
 
-	void ProcessStatRequests(RequestHandler& request_handler, std::ostream& output);
+    void ProcessRequests(const json::Node& stat_requests, RequestHandler& rh) const;
 
-	renderer::MapRenderer LoadRenderSettings();
+    void FillCatalogue(transport::Catalogue& catalogue);
+    renderer::MapRenderer FillRenderSettings(const json::Node& settings) const;
+    transport::Router FillRoutingSettings(const json::Node& settings) const;
+
+    const json::Node PrintRoute(const json::Dict& request_map, RequestHandler& rh) const;
+    const json::Node PrintStop(const json::Dict& request_map, RequestHandler& rh) const;
+    const json::Node PrintMap(const json::Dict& request_map, RequestHandler& rh) const;
+    const json::Node PrintRouting(const json::Dict& request_map, RequestHandler& rh) const;
 
 private:
-	json::Node requests_;
+    json::Document input_;
+    json::Node dummy_ = nullptr;
 
-	void LoadStopDistancesRequests(transport_catalogue::TransportCatalogue& tcat);
-
-	void LoadStopRequests(transport_catalogue::TransportCatalogue& tcat);
-
-	void LoadBusRequests(transport_catalogue::TransportCatalogue& tcat);
+    std::tuple<std::string_view, geo::Coordinates, std::map<std::string_view, int>> FillStop(const json::Dict& request_map) const;
+    void FillStopDistances(transport::Catalogue& catalogue) const;
+    std::tuple<std::string_view, std::vector<const transport::Stop*>, bool> FillRoute(const json::Dict& request_map, transport::Catalogue& catalogue) const;
 };
-
-/*
- * Здесь можно разместить код наполнения транспортного справочника данными из JSON,
- * а также код обработки запросов к базе и формирование массива ответов в формате JSON
- */

@@ -1,38 +1,31 @@
 #pragma once
+
 #include "geo.h"
+
 #include <string>
 #include <vector>
+#include <set>
+#include <unordered_map>
 
-namespace domain {
+namespace transport {
 
-	struct BusInfo {
-		int stops_on_route = 0;
-		int unique_stops = 0;
-		int route_lenght = 0;
-		double curvature = 0;
-	};
+struct Stop {
+    std::string name;
+    geo::Coordinates coordinates;
+    std::set<std::string> buses_by_stop;
+};
 
-	// структура остановки.
-	struct Stop {
-		std::string name;
-		geo::Coordinates coordinates;
-	};
+struct Bus {
+    std::string number;
+    std::vector<const Stop*> stops;
+    bool is_circle;
+};
 
-	// структура маршрута.
-	struct Bus {
-		std::string name;
-		bool is_circle;
-		std::vector<Stop*> stops; // остановки маршрута и расстояние до следующей остановки. В последней остановке расстояние = 0.
-	};
-}
-/*
- * В этом файле вы можете разместить классы/структуры, которые являются частью предметной области (domain)
- * вашего приложения и не зависят от транспортного справочника. Например Автобусные маршруты и Остановки. 
- *
- * Их можно было бы разместить и в transport_catalogue.h, однако вынесение их в отдельный
- * заголовочный файл может оказаться полезным, когда дело дойдёт до визуализации карты маршрутов:
- * визуализатор карты (map_renderer) можно будет сделать независящим от транспортного справочника.
- *
- * Если структура вашего приложения не позволяет так сделать, просто оставьте этот файл пустым.
- *
- */
+struct BusStat {
+    size_t stops_count;
+    size_t unique_stops_count;
+    double route_length;
+    double curvature;
+};
+
+} // namespace transport
